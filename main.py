@@ -1,4 +1,4 @@
-# main.py -- put your code here!
+# main.py 
 
 import machine
 from time import sleep
