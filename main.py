@@ -4,8 +4,8 @@ import machine
 from time import sleep
 import dht 
 
-#sensor = dht.DHT22(machine.Pin(14))
-sensor = dht.DHT11(machine.Pin(5))
+sensor = dht.DHT22(machine.Pin(5))
+#sensor = dht.DHT11(machine.Pin(5))
 
 def deep_sleep(msecs):
   #configure RTC.ALARM0 to be able to wake the device
