@@ -26,7 +26,7 @@ station.active(True)
 station.connect(ssid, wifi_password)
 
 while station.isconnected() == False:
-  print('/r' + time.localtime()[5], end='')
+  print('/r' + str(time.localtime()[5]), end='')
   pass
 
 print('Connection successful')
