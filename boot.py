@@ -14,20 +14,25 @@ import scrt
 esp.osdebug(None)
 gc.collect()
 
-ssid = scrt.SSID
-wifi_password = scrt.WIFIPWD
-mqtt_server = scrt.MQTTSERVER
-mqtt_user = scrt.MQTTUSER
-mqtt_password = scrt.MQTTPWD
-client_id = ubinascii.hexlify(machine.unique_id()).decode()
+device_id = ubinascii.hexlify(machine.unique_id()).decode()
 
-station = network.WLAN(network.STA_IF)
-station.active(True)
-station.connect(ssid, wifi_password)
+def connect_wifi():
+    station = network.WLAN(network.STA_IF)
+    station.active(True)
+    station.connect(scrt.SSID, scrt.WIFIPWD)
+    while station.isconnected() == False:
+        print('\r' + str(time.localtime()[5]), end='')
+    pass
+    print('')
+    print('Connection successful')
+    print(station.ifconfig())
 
-while station.isconnected() == False:
-  print('/r' + str(time.localtime()[5]), end='')
-  pass
+def connect_mqtt():
+    global device_id
+    client = MQTTClient(device_id, scrt.MQTTSERVER, 0, scrt.MQTTUSER, scrt.MQTTPWD)
+    client.connect()
+    print('Connected to {} MQTT broker'.format(mqtt_server))
+    return client
 
-print('Connection successful')
-print(station.ifconfig())
+connect_wifi()
+client = connect_mqtt()
