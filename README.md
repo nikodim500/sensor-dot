@@ -2,12 +2,14 @@
 Based on ESP8266/ESP32 platform it integrates with Home Assistant via MQTT.
 
 **Features**
+
 _Implemented_
 - WiFi connection
 - NTP time syncronization
 - MQTT broker connection
 - Temperature measurement
 - Humidity measurement
+  
 _TODO_
 - Temperature measurement MQTT broadcasting
 - Humidity measurement MQTT broadcasting
