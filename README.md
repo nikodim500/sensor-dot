@@ -1,5 +1,4 @@
 **Sensor-dot** is a small self-made device to track temperature, humidity, light intensity and movments.
-Based on ESP8266/ESP32 platform it integrates with Home Assistant via MQTT.
 
 **Features**
 
@@ -20,3 +19,10 @@ _TODO_
 - PIR movement detection
 - PIR movement detection MQTT broadcasting
 - ?Wake up on PIR movement detection
+
+_Hardware_
+
+Based on ESP8266/ESP32 platform it integrates with Home Assistant via MQTT.
+Power supply is two AA batteries.
+Sensors:
+Temperature and humidity - DHT22
