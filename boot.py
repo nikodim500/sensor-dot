@@ -12,9 +12,10 @@ import gc
 import scrt
 import ntptime
 
-
 esp.osdebug(None)
 gc.collect()
+
+# TODO: Initiate pins
 
 device_id = ubinascii.hexlify(machine.unique_id()).decode()
 
@@ -29,8 +30,8 @@ def connect_wifi():
     print('Connection successful')
     print(station.ifconfig())
     ntptime.settime()
-    t = time.localtime
-    print('NTP time syncronized. UTC time: ' + t[2] + '/' + t[1] + '/' + t[0] + ' ' + t[3] + ':' + t[4] + ':' + t[5])
+    t = time.localtime()
+    print('NTP time syncronized. UTC time: {}/{}/{} {}:{}:{}'.format(t[2], t[1], t[0], t[3], t[4], t[5]))
 
 def connect_mqtt():
     global device_id
@@ -38,6 +39,7 @@ def connect_mqtt():
     client.connect()
     print('Connected to {}:{} MQTT broker'.format(client.server, client.port))
     return client
+# TODO: MQTT Home Assistant discovery
 
 connect_wifi()
 client = connect_mqtt()

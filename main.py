@@ -22,7 +22,11 @@ humidity = -100
 def send_measures():
   print('Temperature: {} C'.format(temperature))
   print('Humidity: {} %'.format(humidity))
+  # TODO: Print light measures 
+  # TODO: MQTT broadcast
+  
 
+  # TODO: PIR detection
 
 while True:
   try:
@@ -31,8 +35,12 @@ while True:
     hum = sensor.humidity()
     temperature = temp
     humidity = hum
+    # TODO: Light measures
     send_measures()
-    #deep_sleep(300000)
+    # TODO: Deep sleep
+    # deep_sleep(300000)
+
+    # TODO: Treshold for WiFi/MQTT reconnection
   except OSError as e:
     print('Failed to read sensor.')
   sleep(2)
