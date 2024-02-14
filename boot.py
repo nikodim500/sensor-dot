@@ -21,6 +21,7 @@ dht_sensor = dht.DHT22(machine.Pin(DHT_PIN))
 
 
 device_id = scrt.DEVNAME + '_' + ubinascii.hexlify(machine.unique_id()).decode()
+device_name = scrt.DEVHUMNAME + ' (' + ubinascii.hexlify(machine.unique_id()).decode() + ')'
 
 def connect_wifi():
     station = network.WLAN(network.STA_IF)
@@ -41,14 +42,19 @@ def mqtt_connect_discovery():
     mqtt_client = MQTTClient(device_id, scrt.MQTTSERVER, 0, scrt.MQTTUSER, scrt.MQTTPWD, keepalive = scrt.UPDPERIOD + 10)
     mqtt_client.connect()
     print('Connected to {}:{} MQTT broker'.format(mqtt_client.server, mqtt_client.port))
-    sensor_temperature_config = { "unit_of_measurement": "°C", "device_class": "temperature", "value_template": "{{ value_json.temperature }}" }
+
     sensor_id = device_id + '_temperature'
-    mqtt_sensor_temperature = Sensor(mqtt_client, device_id.encode('utf-8'), sensor_id.encode('utf-8'), extra_conf=sensor_temperature_config)
-    sensor_humidity_config = { "unit_of_measurement": "%", "device_class": "humidity", "value_template": "{{ value_json.humidity }}" }
+    identifiers = { "identifiers":[sensor_id] }
+    sensor_temperature_config = { "unit_of_measurement": "°C", "device_class": "temperature", "value_template": "{{ value_json.temperature }}", "devices":identifiers }
+    mqtt_sensor_temperature = Sensor(mqtt_client, device_name.encode('utf-8'), sensor_id.encode('utf-8'), extra_conf=sensor_temperature_config)
+    
     sensor_id = device_id + '_humidity'
-    mqtt_sensor_humidity = Sensor(mqtt_client, device_id.encode('utf-8'), sensor_id.encode('utf-8'), extra_conf=sensor_humidity_config)
+    identifiers = { "identifiers":[sensor_id] }
+    sensor_humidity_config = { "unit_of_measurement": "%", "device_class": "humidity", "value_template": "{{ value_json.humidity }}", "devices":identifiers }
+    mqtt_sensor_humidity = Sensor(mqtt_client, device_name.encode('utf-8'), sensor_id.encode('utf-8'), extra_conf=sensor_humidity_config)
+
     return mqtt_client
-# TODO: MQTT Home Assistant discovery
+
 
 connect_wifi()
 
