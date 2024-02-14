@@ -2,7 +2,6 @@
 # Add time sync
 
 import time
-from umqttsimple import MQTTClient
 import ubinascii
 import machine
 import micropython
@@ -11,13 +10,17 @@ import esp
 import gc
 import scrt
 import ntptime
+import dht 
+from umqtt.robust import MQTTClient
+from hamqtt import Sensor
+import ujson as json
 
-esp.osdebug(None)
-gc.collect()
+# TODO: Initiate sensors
+DHT_PIN = 5
+dht_sensor = dht.DHT22(machine.Pin(DHT_PIN))
 
-# TODO: Initiate pins
 
-device_id = ubinascii.hexlify(machine.unique_id()).decode()
+device_id = scrt.DEVNAME + '_' + ubinascii.hexlify(machine.unique_id()).decode()
 
 def connect_wifi():
     station = network.WLAN(network.STA_IF)
@@ -33,13 +36,24 @@ def connect_wifi():
     t = time.localtime()
     print('NTP time syncronized. UTC time: {}/{}/{} {}:{}:{}'.format(t[2], t[1], t[0], t[3], t[4], t[5]))
 
-def connect_mqtt():
-    global device_id
-    client = MQTTClient(device_id, scrt.MQTTSERVER, 0, scrt.MQTTUSER, scrt.MQTTPWD)
-    client.connect()
-    print('Connected to {}:{} MQTT broker'.format(client.server, client.port))
-    return client
+def mqtt_connect_discovery():
+    global device_id, mqtt_sensor_temperature, mqtt_sensor_humidity
+    mqtt_client = MQTTClient(device_id, scrt.MQTTSERVER, 0, scrt.MQTTUSER, scrt.MQTTPWD, keepalive = scrt.UPDPERIOD + 10)
+    mqtt_client.connect()
+    print('Connected to {}:{} MQTT broker'.format(mqtt_client.server, mqtt_client.port))
+    sensor_temperature_config = { "unit_of_measurement": "°C", "device_class": "temperature", "value_template": "{{ value_json.temperature }}" }
+    sensor_id = device_id + '_temperature'
+    mqtt_sensor_temperature = Sensor(mqtt_client, device_id.encode('utf-8'), sensor_id.encode('utf-8'), extra_conf=sensor_temperature_config)
+    sensor_humidity_config = { "unit_of_measurement": "%", "device_class": "humidity", "value_template": "{{ value_json.humidity }}" }
+    sensor_id = device_id + '_humidity'
+    mqtt_sensor_humidity = Sensor(mqtt_client, device_id.encode('utf-8'), sensor_id.encode('utf-8'), extra_conf=sensor_humidity_config)
+    return mqtt_client
 # TODO: MQTT Home Assistant discovery
 
 connect_wifi()
-client = connect_mqtt()
+
+mqtt_client = mqtt_connect_discovery() # should it be in the main loop?
+mqtt_client.DEBUG = True
+
+esp.osdebug(None)
+gc.collect()
