@@ -45,7 +45,7 @@ def connect_wifi():
     print('NTP time syncronized. UTC time: {}/{}/{} {}:{}:{}'.format(t[2], t[1], t[0], t[3], t[4], t[5]))
 
 def mqtt_connect_discovery():
-    global device_id, mqtt_sensor_temperature, mqtt_sensor_humidity
+    global device_id, mqtt_sensor_temperature, mqtt_sensor_humidity, mqtt_sensor_light
     mqtt_client = MQTTClient(device_id, scrt.MQTTSERVER, 0, scrt.MQTTUSER, scrt.MQTTPWD, keepalive = scrt.UPDPERIOD + 10)
     mqtt_client.connect()
     print('Connected to {}:{} MQTT broker'.format(mqtt_client.server, mqtt_client.port))
@@ -59,6 +59,11 @@ def mqtt_connect_discovery():
     identifiers = { "identifiers":[sensor_id] }
     sensor_humidity_config = { "unit_of_measurement": "%", "device_class": "humidity", "value_template": "{{ value_json.humidity }}", "devices":identifiers }
     mqtt_sensor_humidity = Sensor(mqtt_client, device_name.encode('utf-8'), sensor_id.encode('utf-8'), extra_conf=sensor_humidity_config)
+
+    sensor_id = device_id + '_light'
+    identifiers = { "identifiers":[sensor_id] }
+    sensor_light_config = { "unit_of_measurement": "lx", "device_class": "illuminance", "value_template": "{{ value_json.value }}", "devices":identifiers }
+    mqtt_sensor_light = Sensor(mqtt_client, device_name.encode('utf-8'), sensor_id.encode('utf-8'), extra_conf=sensor_light_config)
 
     return mqtt_client
 

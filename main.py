@@ -24,6 +24,8 @@ def send_measures():
   mqtt_sensor_temperature.publish_state(payload)
   payload = json.dumps({"humidity":humidity})
   mqtt_sensor_humidity.publish_state(payload)
+  payload = json.dumps({"value":light})
+  mqtt_sensor_light.publish_state(payload)
 
 # TODO: PIR detection
 
@@ -37,7 +39,7 @@ while True:
     print('Failed to read DHT sensor.{}'.format(e))
 
   try:
-    light = light_sensor.luminance(BH1750.ONCE_HIRES_1)
+    light = round(light_sensor.luminance(BH1750.ONCE_HIRES_2), 1)
   except OSError as e:
     print('Failed to read light sensor.{}'.format(e))
     # TODO: More meaningful error handling
