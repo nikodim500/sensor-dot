@@ -3,7 +3,7 @@
 
 import time
 import ubinascii
-import machine
+from machine import Pin, unique_id, SoftI2C
 import micropython
 import network
 import esp
@@ -14,14 +14,21 @@ import dht
 from umqtt.robust import MQTTClient
 from hamqtt import Sensor
 import ujson as json
+from bh1750 import BH1750
 
 # TODO: Initiate sensors
 DHT_PIN = 5
-dht_sensor = dht.DHT22(machine.Pin(DHT_PIN))
+LIGHT_A_PIN = 4
+LIGHT_D_PIN = 23
+SCL_PIN = Pin(22)
+SDA_PIN = Pin(21)
+i2c = SoftI2C(scl = SCL_PIN, sda = SDA_PIN)
 
+dht_sensor = dht.DHT22(Pin(DHT_PIN))
+light_sensor = BH1750(i2c)
 
-device_id = scrt.DEVNAME + '_' + ubinascii.hexlify(machine.unique_id()).decode()
-device_name = scrt.DEVHUMNAME + ' (' + ubinascii.hexlify(machine.unique_id()).decode() + ')'
+device_id = scrt.DEVNAME + '_' + ubinascii.hexlify(unique_id()).decode()
+device_name = scrt.DEVHUMNAME + ' (' + ubinascii.hexlify(unique_id()).decode() + ')'
 
 def connect_wifi():
     station = network.WLAN(network.STA_IF)
@@ -63,3 +70,5 @@ mqtt_client.DEBUG = True
 
 esp.osdebug(None)
 gc.collect()
+
+

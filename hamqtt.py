@@ -13,8 +13,7 @@ class BaseEntity(object):
         self.config_topic = base_topic + b'config'
         self.state_topic = base_topic + b'state'
 
-        identifiers = {"identifiers":[name]}
-        self.config = {"unique_id": object_id, "name": name, "state_topic": self.state_topic, "devices":identifiers}
+        self.config = {"unique_id": object_id, "name": name, "state_topic": self.state_topic}
         if extra_conf:
             self.config.update(extra_conf)
         self.mqtt.publish(self.config_topic, bytes(json.dumps(self.config), 'utf-8'), True, 1)
