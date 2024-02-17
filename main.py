@@ -13,11 +13,26 @@ def deep_sleep(msecs):
 temperature = -255
 humidity = -255
 light = -255
+motion = False
+PIR_triggered = False
+
+def do_interrupt(Pin):
+  global motion, PIR_triggered
+  if Pin.value() == 1:
+    print(timestr() + ' Motion detected ON')
+    motion = True
+  else:
+    print(timestr() + ' Motion detected OFF')
+    motion = False
+  PIR_triggered = True
+
+PIR_PIN.irq(trigger=Pin.IRQ_RISING|Pin.IRQ_FALLING, handler=do_interrupt)
 
 def send_measures():
-  print('Temperature: {} C'.format(temperature))
-  print('Humidity: {} %'.format(humidity))
-  print('Light level: {} lux'.format(light))
+  global temperature, humidity, light, motion, PIR_triggered
+  print(timestr() + ' Temperature: {} C'.format(temperature))
+  print(timestr() + ' Humidity: {} %'.format(humidity))
+  print(timestr() + ' Light level: {} lux'.format(light))
   # TODO: Print light measures 
   # TODO: MQTT broadcast
   payload = json.dumps({"temperature":temperature})
@@ -27,7 +42,14 @@ def send_measures():
   payload = json.dumps({"value":light})
   mqtt_sensor_light.publish_state(payload)
 
-# TODO: PIR detection
+  if PIR_triggered:
+    PIR_triggered = False
+    if motion:
+      payload = json.dumps({"value":"on"})
+      mqtt_sensor_motion.publish_state(payload)
+    else:
+      payload = json.dumps({"value":"off"})
+      mqtt_sensor_motion.publish_state(payload)
 
 while True:
   try:
