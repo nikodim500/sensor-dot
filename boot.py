@@ -12,7 +12,7 @@ import scrt
 import ntptime
 import dht 
 from umqtt.robust import MQTTClient
-from hamqtt import Sensor
+from hamqtt import Sensor, BinarySensor
 import ujson as json
 from bh1750 import BH1750
 
@@ -70,7 +70,7 @@ def mqtt_connect_discovery():
     sensor_id = device_id + '_motion'
     identifiers = { "identifiers":[sensor_id] }
     sensor_motion_config = { "device_class": "motion", "value_template": "{{ value_json.value }}", "devices":identifiers }
-    mqtt_sensor_motion = Sensor(mqtt_client, device_name.encode('utf-8'), sensor_id.encode('utf-8'), extra_conf=sensor_motion_config)
+    mqtt_sensor_motion = BinarySensor(mqtt_client, device_name.encode('utf-8'), sensor_id.encode('utf-8'), extra_conf=sensor_motion_config)
 
     return mqtt_client
 
@@ -82,5 +82,7 @@ mqtt_client.DEBUG = True
 
 esp.osdebug(None)
 gc.collect()
+
+
 
 

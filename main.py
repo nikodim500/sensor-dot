@@ -45,11 +45,9 @@ def send_measures():
   if PIR_triggered:
     PIR_triggered = False
     if motion:
-      payload = json.dumps({"value":"on"})
-      mqtt_sensor_motion.publish_state(payload)
+      mqtt_sensor_motion.on()
     else:
-      payload = json.dumps({"value":"off"})
-      mqtt_sensor_motion.publish_state(payload)
+      mqtt_sensor_motion.off()
 
 while True:
   try:
