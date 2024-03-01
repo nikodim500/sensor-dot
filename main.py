@@ -1,32 +1,15 @@
 # main.py 
 # Imports and initiations in boot.py
 
-def deep_sleep(msecs):
-  #configure RTC.ALARM0 to be able to wake the device
-  rtc = machine.RTC()
-  rtc.irq(trigger=rtc.ALARM0, wake=machine.DEEPSLEEP)
-  # set RTC.ALARM0 to fire after Xmilliseconds, waking the device
-  rtc.alarm(rtc.ALARM0, msecs)
-  #put the device to sleep
-  machine.deepsleep()
+def deep_sleep(secs):
+  log('Going deep sleep for {} sec'.format(secs))
+  machine.deepsleep(secs * 1000)
 
 temperature = -255
 humidity = -255
 light = -255
 motion = False
 PIR_triggered = False
-
-def do_interrupt(Pin):
-  global motion, PIR_triggered
-  if Pin.value() == 1:
-    log('Motion detected ON')
-    motion = True
-  else:
-    log('Motion detected OFF')
-    motion = False
-  PIR_triggered = True
-
-PIR_PIN.irq(trigger=Pin.IRQ_RISING|Pin.IRQ_FALLING, handler=do_interrupt)
 
 def send_measures():
   global temperature, humidity, light, motion, PIR_triggered
@@ -42,14 +25,7 @@ def send_measures():
   payload = json.dumps({"value":light})
   mqtt_sensor_light.publish_state(payload)
 
-  if PIR_triggered:
-    PIR_triggered = False
-    if motion:
-      mqtt_sensor_motion.on()
-    else:
-      mqtt_sensor_motion.off()
-
-while True:
+def do_measure():
   try:
     dht_sensor.measure()
     temperature = dht_sensor.temperature()
@@ -62,8 +38,9 @@ while True:
     light = round(light_sensor.luminance(BH1750.ONCE_HIRES_2), 1)
   except OSError as e:
     log('Failed to read light sensor.{}'.format(e))
-    # TODO: More meaningful error handling
 
+while True:
   send_measures()
-  time.sleep(5)
+  do_measure()
+  deep_sleep(scrt.UPDPERIOD)
 #  time.sleep(scrt.UPDPERIOD)

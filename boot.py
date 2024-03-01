@@ -43,7 +43,7 @@ def connect_wifi():
     station.active(True)
     station.connect(scrt.SSID, scrt.WIFIPWD)
     while station.isconnected() == False:
-        print('\r' + str(time.localtime()[5]), end='')
+        print('\r' + timestr(), end='')
     pass
     print('')
     log('Connection successful')
