@@ -1,12 +1,8 @@
 {
 	"folders": [
 		{
-			"name": "sensor-dot",
 			"path": "."
-		},
-		{
-			"name": "serial:/COM3",
-			"uri": "serial://com3/"
 		}
-	]
+	],
+	"settings": {}
 }

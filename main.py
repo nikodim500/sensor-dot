@@ -19,10 +19,10 @@ PIR_triggered = False
 def do_interrupt(Pin):
   global motion, PIR_triggered
   if Pin.value() == 1:
-    print(timestr() + ' Motion detected ON')
+    log('Motion detected ON')
     motion = True
   else:
-    print(timestr() + ' Motion detected OFF')
+    log('Motion detected OFF')
     motion = False
   PIR_triggered = True
 
@@ -30,9 +30,9 @@ PIR_PIN.irq(trigger=Pin.IRQ_RISING|Pin.IRQ_FALLING, handler=do_interrupt)
 
 def send_measures():
   global temperature, humidity, light, motion, PIR_triggered
-  print(timestr() + ' Temperature: {} C'.format(temperature))
-  print(timestr() + ' Humidity: {} %'.format(humidity))
-  print(timestr() + ' Light level: {} lux'.format(light))
+  log('Temperature: {} C'.format(temperature))
+  log('Humidity: {} %'.format(humidity))
+  log('Light level: {} lux'.format(light))
   # TODO: Print light measures 
   # TODO: MQTT broadcast
   payload = json.dumps({"temperature":temperature})
@@ -56,12 +56,12 @@ while True:
     humidity = dht_sensor.humidity()
     # TODO: Treshold for WiFi/MQTT reconnection
   except OSError as e:
-    print('Failed to read DHT sensor.{}'.format(e))
+    log('Failed to read DHT sensor.{}'.format(e))
 
   try:
     light = round(light_sensor.luminance(BH1750.ONCE_HIRES_2), 1)
   except OSError as e:
-    print('Failed to read light sensor.{}'.format(e))
+    log('Failed to read light sensor.{}'.format(e))
     # TODO: More meaningful error handling
 
   send_measures()

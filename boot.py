@@ -33,6 +33,11 @@ def timestr():
     t = time.localtime()
     return ('{:02d}/{:02d}/{} {:02d}:{:02d}:{:02d}'.format(t[2], t[1], t[0], t[3], t[4], t[5]))
 
+def log(str):
+    str = timestr() + ' ' + str
+    print(str)
+    # TODO do log
+
 def connect_wifi():
     station = network.WLAN(network.STA_IF)
     station.active(True)
@@ -41,16 +46,16 @@ def connect_wifi():
         print('\r' + str(time.localtime()[5]), end='')
     pass
     print('')
-    print('Connection successful')
+    log('Connection successful')
     print(station.ifconfig())
     ntptime.settime()
-    print('NTP time syncronized. UTC time: ' + timestr())
+    log('NTP time syncronized. UTC time: ' + timestr())
 
 def mqtt_connect_discovery():
     global device_id, mqtt_sensor_temperature, mqtt_sensor_humidity, mqtt_sensor_light, mqtt_sensor_motion
     mqtt_client = MQTTClient(device_id, scrt.MQTTSERVER, 0, scrt.MQTTUSER, scrt.MQTTPWD, keepalive = scrt.UPDPERIOD + 10)
     mqtt_client.connect()
-    print('Connected to {}:{} MQTT broker'.format(mqtt_client.server, mqtt_client.port))
+    log('Connected to {}:{} MQTT broker'.format(mqtt_client.server, mqtt_client.port))
 
     sensor_id = device_id + '_temperature'
     identifiers = { "identifiers":[sensor_id] }
