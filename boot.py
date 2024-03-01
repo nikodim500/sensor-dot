@@ -3,7 +3,7 @@
 
 import time
 import ubinascii
-from machine import Pin, unique_id, SoftI2C
+from machine import Pin, unique_id, SoftI2C, deepsleep
 import micropython
 import network
 import esp
