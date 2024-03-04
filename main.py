@@ -1,46 +1,43 @@
 # main.py 
 # Imports and initiations in boot.py
 
-def deep_sleep(secs):
-  log('Going deep sleep for {} sec'.format(secs))
-  machine.deepsleep(secs * 1000)
-
-temperature = -255
-humidity = -255
-light = -255
-motion = False
-PIR_triggered = False
-
 def send_measures():
-  global temperature, humidity, light, motion, PIR_triggered
-  log('Temperature: {} C'.format(temperature))
-  log('Humidity: {} %'.format(humidity))
-  log('Light level: {} lux'.format(light))
-  # TODO: Print light measures 
-  # TODO: MQTT broadcast
-  payload = json.dumps({"temperature":temperature})
+  global PIR_triggered, mqtt_sensor_motion
+  log('Temperature: {} C'.format(saved_data['temperature']))
+  log('Humidity: {} %'.format(saved_data['humidity']))
+  log('Light level: {} lux'.format(saved_data['light']))
+  payload = json.dumps({"temperature":saved_data['temperature']})
   mqtt_sensor_temperature.publish_state(payload)
-  payload = json.dumps({"humidity":humidity})
+  payload = json.dumps({"humidity":saved_data['humidity']})
   mqtt_sensor_humidity.publish_state(payload)
-  payload = json.dumps({"value":light})
+  payload = json.dumps({"value":saved_data['light']})
   mqtt_sensor_light.publish_state(payload)
+  if PIR_triggered:
+      PIR_triggered = False
+      if saved_data['motion']:
+          log('Motion ON')
+          mqtt_sensor_motion.on
+      else:
+          mqtt_sensor_motion.off
+          log('Motion OFF')
 
 def do_measure():
-  try:
-    dht_sensor.measure()
-    temperature = dht_sensor.temperature()
-    humidity = dht_sensor.humidity()
-    # TODO: Treshold for WiFi/MQTT reconnection
-  except OSError as e:
-    log('Failed to read DHT sensor.{}'.format(e))
-
-  try:
-    light = round(light_sensor.luminance(BH1750.ONCE_HIRES_2), 1)
-  except OSError as e:
-    log('Failed to read light sensor.{}'.format(e))
+    global saved_data
+    try:
+        dht_sensor.measure()
+        saved_data['temperature'] = dht_sensor.temperature()
+        saved_data['humidity'] = dht_sensor.humidity()
+        # TODO: Treshold for WiFi/MQTT reconnection
+    except OSError as e:
+        log('Failed to read DHT sensor.{}'.format(e))
+    try:
+        saved_data['light'] = round(light_sensor.luminance(BH1750.ONCE_HIRES_2), 1)
+    except OSError as e:
+        log('Failed to read light sensor.{}'.format(e))
+    save_json(scrt.DATAFILE, saved_data)
 
 while True:
-  send_measures()
-  do_measure()
-  deep_sleep(scrt.UPDPERIOD)
-#  time.sleep(scrt.UPDPERIOD)
+    do_measure()
+    send_measures()
+    deep_sleep(scrt.UPDPERIOD)
+  #  time.sleep(scrt.UPDPERIOD)
