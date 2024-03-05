@@ -53,7 +53,7 @@ def load_json(json_file):
             f.close()
             return d
     except OSError as e:
-        log('Failed to load JSON file {}. Errod {}'.format(json_file, e))
+        log('Failed to load JSON file {}. Error {}'.format(json_file, e))
         return None
 
 def save_json(json_file, data):
@@ -63,38 +63,57 @@ def save_json(json_file, data):
             f.close()
             return True
     except OSError as e:
-        log('Failed to load JSON file {}. Errod {}'.format(json_file, e))
+        log('Failed to load JSON file {}. Error {}'.format(json_file, e))
         return False
 
-def deep_sleep(secs):
-  log('Going deep sleep for {} sec'.format(secs))
-  deepsleep(secs * 1000)
+def deep_sleep():
+  log('Going deep sleep for {} sec'.format(scrt.UPDPERIOD))
+  deepsleep(scrt.UPDPERIOD * 1000)
 
 json_data = load_json(scrt.DATAFILE)
-if isinstance(json_data, list):
+if isinstance(json_data, dict):
     saved_data = json_data
+    log('Loaded saved data from file: {}'.format(saved_data))
 
 if wake_reason() == PIN_WAKE:   # if ESP woke up by PIR
     if saved_data['motion']:    # if saved last motion status is active then do nothing, go deep sleep
+        time.sleep(5)
         deep_sleep()
     else:                       # if motion was not active toggle it and set PIR triggered
         saved_data['motion'] = True
         PIR_triggered = True
 else:
-    saved_data['motion'] = False
+    if saved_data['motion']:
+        saved_data['motion'] = False
+        PIR_triggered = True
 
 def connect_wifi():
-    station = network.WLAN(network.STA_IF)
-    station.active(True)
-    station.connect(scrt.SSID, scrt.WIFIPWD)
-    while station.isconnected() == False:
-        print('\r' + timestr(), end='')
-    pass
-    print('')
-    log('Connection successful')
-    print(station.ifconfig())
-    ntptime.settime()
-    log('NTP time syncronized. UTC time: ' + timestr())
+    try:
+        station = network.WLAN(network.STA_IF)
+        station.active(True)
+        start = time.time()
+        station.connect(scrt.SSID, scrt.WIFIPWD)
+        while station.isconnected() == False:
+            print('\r' + timestr(), end='')
+            if time.time() - start > scrt.WIFITIMOUT:
+                raise OSError(ETIMEDOUT)
+            time.sleep_ms(200)
+        pass
+        print('')
+        log('Connection successful')
+        print(station.ifconfig())
+        return True
+    except OSError as e:
+        log('Failed to connect WIFI. Error {}'.format(e))
+        return False
+    
+def sync_time():
+    try:
+        ntptime.settime()
+        log('NTP time syncronized. UTC time: ' + timestr())
+    except OSError as e:
+        log('Failed to synchronize time. Error {}'.format(e))
+        return False
 
 def mqtt_connect_discovery():
     global device_id, mqtt_sensor_temperature, mqtt_sensor_humidity, mqtt_sensor_light, mqtt_sensor_motion
@@ -125,10 +144,16 @@ def mqtt_connect_discovery():
     return mqtt_client
 
 
-connect_wifi()
-
-mqtt_client = mqtt_connect_discovery() # should it be in the main loop?
-mqtt_client.DEBUG = True
+if connect_wifi():
+    sync_time()
+    try:
+        mqtt_client = mqtt_connect_discovery() 
+        mqtt_client.DEBUG = True
+    except OSError as e:
+        log('Failed to connect to MQTT broker. Error {}'.format(e))
+        deep_sleep()
+else:
+    deep_sleep()
 
 esp.osdebug(None)
 gc.collect()
