@@ -79,8 +79,8 @@ if isinstance(json_data, dict):
     log('Loaded saved data from file: {}'.format(saved_data))
 
 if wake_reason() == PIN_WAKE:   # if ESP woke up by PIR
+    scrt.UPDPERIOD = scrt.AFTERMOTIONPERIOD     # change deep sleep time to AFTERMOTIONPERIOD
     if saved_data['motion']:    # if saved last motion status is active then do nothing, go deep sleep
-        scrt.UPDPERIOD = scrt.AFTERMOTIONPERIOD     # change deep sleep time to AFTERMOTIONPERIOD
         time.sleep(5)
         deep_sleep()
     else:                       # if motion was not active toggle it and set PIR triggered
