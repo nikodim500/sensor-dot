@@ -2,24 +2,20 @@
 # Imports and initiations in boot.py
 
 def send_measures():
-    global PIR_triggered, mqtt_sensor_motion, mqtt_sensor_temperature, mqtt_sensor_humidity, mqtt_sensor_light
+    global mqtt_sensor_motion, mqtt_sensor_temperature, mqtt_sensor_humidity, mqtt_sensor_light
     mqtt_sensor_temperature.publish_state({"temperature":saved_data['temperature']})
     mqtt_sensor_humidity.publish_state({"humidity":saved_data['humidity']})
     mqtt_sensor_light.publish_state({"value":saved_data['light']})
-    if PIR_triggered:
-        PIR_triggered = False
-        if saved_data['motion']:
-            log('Motion ON')
-            mqtt_sensor_motion.on()
-        else:
-            mqtt_sensor_motion.off()
-            log('Motion OFF')
+    if saved_data['motion']:
+        mqtt_sensor_motion.on()
     else:
-        log('Motion activity: {}'.format(saved_data['motion'])) 
+        mqtt_sensor_motion.off()
 
+    log('Motion activity: {}'.format(saved_data['motion'])) 
     log('Temperature: {} C'.format(saved_data['temperature']))
     log('Humidity: {} %'.format(saved_data['humidity']))
     log('Light level: {} lux'.format(saved_data['light']))
+
     time.sleep(1)       # give time to deliver messages
 
 

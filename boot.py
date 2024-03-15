@@ -33,8 +33,6 @@ esp32.wake_on_ext0(pin = PIR_PIN, level = esp32.WAKEUP_ANY_HIGH)
 device_id = scrt.DEVNAME + '_' + ubinascii.hexlify(unique_id()).decode()
 device_name = scrt.DEVHUMNAME + ' (' + ubinascii.hexlify(unique_id()).decode() + ')'
 
-PIR_triggered = False
-
 saved_data = { 'motion' : False, 'temperature' : -255, 'humidity' : -255, 'light' : -255 }
 
 def timestr():
@@ -86,11 +84,9 @@ if wake_reason() == PIN_WAKE:   # if ESP woke up by PIR
         deep_sleep()
     else:                       # if motion was not active toggle it and set PIR triggered
         saved_data['motion'] = True
-        PIR_triggered = True
 else:
     if saved_data['motion']:
         saved_data['motion'] = False
-        PIR_triggered = True
 
 def connect_wifi():
     global station
