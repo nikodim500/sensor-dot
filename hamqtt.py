@@ -24,7 +24,7 @@ class BaseEntity(object):
     def publish_state(self, state):
         self.mqtt.publish(self.state_topic, bytes(json.dumps(state), 'utf-8'))
 
-    def disconnect():
+    def disconnect(self):
         self.mqtt.disconnect()
 
 class BinarySensor(BaseEntity):
