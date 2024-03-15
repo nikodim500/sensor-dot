@@ -23,6 +23,8 @@ SDA_PIN = Pin(21)
 i2c = SoftI2C(scl = SCL_PIN, sda = SDA_PIN)
 PIR_PIN = Pin(15, Pin.IN)
 
+station = None              #WiFi client        
+
 dht_sensor = dht.DHT22(Pin(DHT_PIN))
 light_sensor = BH1750(i2c)
 
@@ -67,8 +69,10 @@ def save_json(json_file, data):
         return False
 
 def deep_sleep():
-  log('Going deep sleep for {} sec'.format(scrt.UPDPERIOD))
-  deepsleep(scrt.UPDPERIOD * 1000)
+    global station
+    station.disconnect()
+    log('Going deep sleep for {} sec'.format(scrt.UPDPERIOD))
+    deepsleep(scrt.UPDPERIOD * 1000)
 
 json_data = load_json(scrt.DATAFILE)
 if isinstance(json_data, dict):
@@ -88,6 +92,7 @@ else:
         PIR_triggered = True
 
 def connect_wifi():
+    global station
     try:
         station = network.WLAN(network.STA_IF)
         station.active(True)
@@ -98,7 +103,6 @@ def connect_wifi():
             if time.time() - start > scrt.WIFITIMOUT:
                 raise OSError(ETIMEDOUT)
             time.sleep_ms(200)
-        pass
         print('')
         log('Connection successful')
         print(station.ifconfig())
@@ -141,7 +145,7 @@ def mqtt_connect_discovery():
     sensor_motion_config = { "device_class": "motion", "value_template": "{{ value_json.value }}", "devices":identifiers }
     mqtt_sensor_motion = BinarySensor(mqtt_client, device_name.encode('utf-8'), sensor_id.encode('utf-8'), extra_conf=sensor_motion_config)
 
-    return mqtt_client
+    return mqtt_client;
 
 
 if connect_wifi():

@@ -2,16 +2,13 @@
 # Imports and initiations in boot.py
 
 def send_measures():
-    global PIR_triggered, mqtt_sensor_motion
+    global PIR_triggered, mqtt_sensor_motion, mqtt_sensor_temperature, mqtt_sensor_humidity, mqtt_sensor_light
     log('Temperature: {} C'.format(saved_data['temperature']))
     log('Humidity: {} %'.format(saved_data['humidity']))
     log('Light level: {} lux'.format(saved_data['light']))
-    payload = json.dumps({"temperature":saved_data['temperature']})
-    mqtt_sensor_temperature.publish_state(payload)
-    payload = json.dumps({"humidity":saved_data['humidity']})
-    mqtt_sensor_humidity.publish_state(payload)
-    payload = json.dumps({"value":saved_data['light']})
-    mqtt_sensor_light.publish_state(payload)
+    mqtt_sensor_temperature.publish_state({"temperature":saved_data['temperature']})
+    mqtt_sensor_humidity.publish_state({"humidity":saved_data['humidity']})
+    mqtt_sensor_light.publish_state({"value":saved_data['light']})
     if PIR_triggered:
         PIR_triggered = False
         if saved_data['motion']:
@@ -22,6 +19,7 @@ def send_measures():
             log('Motion OFF')
     else:
         log('Motion activity: {}'.format(saved_data['motion'])) 
+    mqtt_sensor_motion.disconnect()
 
 
 def do_measure():
