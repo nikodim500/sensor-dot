@@ -70,7 +70,8 @@ def save_json(json_file, data):
 
 def deep_sleep():
     global station
-    station.disconnect()
+    if station:
+        station.disconnect()
     log('Going deep sleep for {} sec'.format(scrt.UPDPERIOD))
     deepsleep(scrt.UPDPERIOD * 1000)
 

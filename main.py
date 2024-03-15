@@ -3,9 +3,6 @@
 
 def send_measures():
     global PIR_triggered, mqtt_sensor_motion, mqtt_sensor_temperature, mqtt_sensor_humidity, mqtt_sensor_light
-    log('Temperature: {} C'.format(saved_data['temperature']))
-    log('Humidity: {} %'.format(saved_data['humidity']))
-    log('Light level: {} lux'.format(saved_data['light']))
     mqtt_sensor_temperature.publish_state({"temperature":saved_data['temperature']})
     mqtt_sensor_humidity.publish_state({"humidity":saved_data['humidity']})
     mqtt_sensor_light.publish_state({"value":saved_data['light']})
@@ -13,13 +10,17 @@ def send_measures():
         PIR_triggered = False
         if saved_data['motion']:
             log('Motion ON')
-            mqtt_sensor_motion.on
+            mqtt_sensor_motion.on()
         else:
-            mqtt_sensor_motion.off
+            mqtt_sensor_motion.off()
             log('Motion OFF')
     else:
         log('Motion activity: {}'.format(saved_data['motion'])) 
-    mqtt_sensor_motion.disconnect()
+
+    log('Temperature: {} C'.format(saved_data['temperature']))
+    log('Humidity: {} %'.format(saved_data['humidity']))
+    log('Light level: {} lux'.format(saved_data['light']))
+    time.sleep(1)       # give time to deliver messages
 
 
 def do_measure():
